@@ -1,0 +1,135 @@
+function setup() {
+  createCanvas(400, 400);
+}
+
+function draw() {
+  background(220);
+}
+// Definições iniciais
+let ball;
+let leftPaddle;
+let rightPaddle;
+
+function setup() {
+  createCanvas(600, 400);
+  ball = new Ball();
+  leftPaddle = new Paddle(true);
+  rightPaddle = new Paddle(false);
+}
+
+function draw() {
+  background(0);
+
+  // Atualiza e desenha a bola
+  ball.update();
+  ball.display();
+  
+  // Atualiza e desenha as raquetes
+  leftPaddle.update();
+  leftPaddle.display();
+  
+  rightPaddle.update();
+  rightPaddle.display();
+  
+  // Checa colisões da bola com as raquetes
+  ball.checkPaddleCollision(leftPaddle);
+  ball.checkPaddleCollision(rightPaddle);
+  
+  // Checa se a bola saiu dos limites
+  ball.checkEdges();
+}
+
+function keyPressed() {
+  if (key === 'W') {
+    leftPaddle.move(-10);
+  } else if (key === 'S') {
+    leftPaddle.move(10);
+  }
+
+  if (keyCode === UP_ARROW) {
+    rightPaddle.move(-10);
+  } else if (keyCode === DOWN_ARROW) {
+    rightPaddle.move(10);
+  }
+}
+
+function keyReleased() {
+  if (key === 'W' || key === 'S') {
+    leftPaddle.move(0);
+  }
+  
+  if (keyCode === UP_ARROW || keyCode === DOWN_ARROW) {
+    rightPaddle.move(0);
+  }
+}
+
+class Ball {
+  constructor() {
+    this.reset();
+  }
+
+  reset() {
+    this.x = width / 2;
+    this.y = height / 2;
+    this.size = 20;
+    this.xSpeed = random(4, 6);
+    this.ySpeed = random(-3, 3);
+  }
+
+  update() {
+    this.x += this.xSpeed;
+    this.y += this.ySpeed;
+  }
+
+  display() {
+    fill(255);
+    noStroke();
+    ellipse(this.x, this.y, this.size);
+  }
+
+  checkPaddleCollision(paddle) {
+    if (this.x - this.size / 2 < paddle.x + paddle.width &&
+        this.x + this.size / 2 > paddle.x &&
+        this.y - this.size / 2 < paddle.y + paddle.height &&
+        this.y + this.size / 2 > paddle.y) {
+      this.xSpeed *= -1;
+      this.x += this.xSpeed;
+    }
+  }
+
+  checkEdges() {
+    if (this.x < 0 || this.x > width) {
+      this.reset();
+    }
+
+    if (this.y < 0 || this.y > height) {
+      this.ySpeed *= -1;
+    }
+  }
+}
+
+class Paddle {
+  constructor(isLeft) {
+    this.width = 20;
+    this.height = 100;
+    this.isLeft = isLeft;
+    this.x = isLeft ? 0 : width - this.width;
+    this.y = height / 2 - this.height / 2;
+    this.ySpeed = 0;
+  }
+
+  update() {
+    this.y += this.ySpeed;
+    this.y = constrain(this.y, 0, height - this.height);
+  }
+
+  display() {
+    fill(255);
+    noStroke();
+    rect(this.x, this.y, this.width, this.height);
+  }
+
+  move(speed) {
+    this.ySpeed = speed;
+  }
+}
